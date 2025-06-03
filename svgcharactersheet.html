@@ -863,11 +863,6 @@
       max-height: 600px;
       overflow: auto;
     }
-
-    input.counterName {
-      all: unset;
-      width: 15em !important;
-    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
   <script src="main.js"></script>
@@ -1061,15 +1056,13 @@
           </tbody>
         </table>
         <div>
-          <button type="button" onclick="openOverlay('aspectPanel')">Skills</button>
-          <button type="button" onclick="openOverlay('aspectPanel')">Abilities</button>
-          <button type="button" onclick="openOverlay('aspectPanel')">Gear</button>
+          <button type="button" onclick="closeOverlay()">Close</button>
+          <button type="button" onclick="openOverlay('aspectPanel')">Aspects</button>
           <button type="button" onclick="openOverlay('conditionPanel')">Conditions</button>
           <button type="button" onclick="openOverlay('notesPanel')">Notes</button>
           <button type="button" onclick="openOverlay('movePanel')">Movement</button>
           <button type="button" onclick="openOverlay('detailsPanel')">Details</button>
           <button type="button" onclick="openOverlay('langPanel')">Languages</button>
-          <button type="button" onclick="closeOverlay()">Close</button>
           <details>
             <summary>Randomizers</summary>
             <button type="button" onclick="generateCharacter(true)">Rand Wild</button>
@@ -1108,8 +1101,8 @@
             <label class="thirtywidth">Flaws: <input type="text" name="flaw" maxlength="50" /></label>
           </div>
         </div>
-        <button type="button" onclick="openOverlay();">Edit Character</button>
         <button type="button" onclick="closeOverlay()">Close</button>
+        <button type="button" onclick="openOverlay();">Edit Character</button>
         <details>
           <summary>Randomizers</summary>
           <button type="button" id="storyBtn">Generate Backstory</button>
@@ -1149,9 +1142,9 @@
           </li>
         </ul>
         <span>Typing in the window will save automatically</span>
+        <button type="button" onclick="closeOverlay()">Close</button>
         <button type="button" onclick="openOverlay();">Edit Character</button>
         <button type="button" onclick="randomizeField('lang')">Randomize Language</button>
-        <button type="button" onclick="closeOverlay()">Close</button>
       </div>
       <div id="notesPanel" class="controlPanel">
         <h2>Character Notes</h2>
@@ -1161,15 +1154,15 @@
             data-counter-id="counter1"></textarea>
         </div>
         <span>Typing in the window will save automatically</span>
-        <button type="button" onclick="openOverlay();">Edit Character</button>
         <button type="button" onclick="closeOverlay()">Close</button>
+        <button type="button" onclick="openOverlay();">Edit Character</button>
       </div>
       <div id="aspectPanel" class="controlPanel">
         <h2>Character Aspects</h2>
         <div>
         </div>
-        <button type="button" onclick="openOverlay();">Edit Character</button>
         <button type="button" onclick="closeOverlay()">Close</button>
+        <button type="button" onclick="openOverlay();">Edit Character</button>
       </div>
       <div id="movePanel" class="controlPanel">
         <h2>Character Movement</h2>
@@ -1202,8 +1195,8 @@
             </tr>
           </tbody>
         </table>
-        <button type="button" onclick="openOverlay();">Edit Character</button>
         <button type="button" onclick="closeOverlay()">Close</button>
+        <button type="button" onclick="openOverlay();">Edit Character</button>
       </div>
       <div id="conditionPanel" class="controlPanel">
         <h2>Conditions</h2>
@@ -1243,22 +1236,15 @@
               </tr>
               <tr>
                 <td colspan="4">
-                  <button type="button" onclick="openOverlay('iconPanel')" class="circle-add-reverse bs svgIcon"
-                    data-title="Click to Select Counter | (SHIFT) Click to add Random">&nbsp;
-                  </button>
+                  <div class="iconBox" id="iconBox">
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+        <button type="button" onclick="closeOverlay()">Close</button>
         <button type="button" onclick="openOverlay();">Edit Character</button>
-        <button type="button" onclick="closeOverlay()">Close</button>
-      </div>
-      <div id="iconPanel" class="controlPanel">
-        <label for="counterName">Name:</label>
-        <div class="iconBox" id="iconBox">
-        </div>
-        <button type="button" onclick="closeOverlay()">Close</button>
       </div>
       <div id="cardsPanel" class="controlPanel">
         <table>
@@ -1634,9 +1620,9 @@
             </tr>
           </tbody>
         </table>
+        <button type="button" onclick="closeOverlay()">Close</button>
         <button type="button" onclick="applySettings()">Apply</button>
         <button type="button" onclick="reshuffle();">Reshuffle</button>
-        <button type="button" onclick="closeOverlay()">Close</button>
         <div>
           <sub class="subtitle">Pressing Apply Shuffles a new Deck</sub>
         </div>
@@ -1691,20 +1677,20 @@
             <button type="button" data-label="Custom Slot 5" id="customRollBtn5">← Roll Dice</button>
           </label>
         </div>
-        <button type="button" onclick="openOverlay();">Edit Character</button>
         <button type="button" onclick="closeOverlay()">Close</button>
+        <button type="button" onclick="openOverlay();">Edit Character</button>
       </div>
       <div id="toolPanel" class="controlPanel">
         <h2>Character Tools</h2>
         <label id="noSoundBtn" for="noSound">Disable Sound?
           <input type="checkbox" id="noSound" />
         </label>
+        <button type="button" onclick="closeOverlay()">Close</button>
         <button type="button" onclick="openOverlay('dicePanel')">Custom Dice Inputs</button>
         <button type="button" onclick="openOverlay('timerPanel')">Timers</button>
         <button type="button" id="clear-history">Clear History</button>
         <button type="button" id="toggle-history">Toggle History</button>
         <button type="button" id="togVisBtn">Toggle Button Visibility</button>
-        <button type="button" onclick="closeOverlay()">Close</button>
       </div>
     </form>
     <div id="bookmarkPanel" class="controlPanel">
@@ -3663,7 +3649,7 @@
 
     const tastes = ['salted sea air', 'bitter ash on the tongue', 'honeyed wine at midnight', 'metallic blood in the mouth', 'frost on a winter breeze', 'sweet citrus at dawn', 'earthy truffle after rain', 'spiced cinnamon on the lips', 'smoke-infused honey', 'sour pomegranate juice', 'oily tar in a graveyard', 'milky tea with lavender', 'hot pepper in velvet', 'dust of ancient ruins', 'creamy mushroom broth', 'tang of ripe berries', 'chalk on a patient’s tongue', 'molten sugar on skin', 'brine-soaked olives', 'icy mint in shadow', 'burnt caramel at dusk', 'iron-rich well water', 'salt crust on cracked lips', 'bitter coffee left too long', 'copper coin on the tongue', 'syrup clinging to bark', 'smoked plum in winter air', 'anise laced with fire', 'dusty rose petals steeped in tea', 'sour milk under starlight', 'rosemary on scorched bread', 'ink spilled in cream', 'fennel crushed by teeth', 'snowmelt on a blade', 'black licorice in the dark', 'grit between the teeth', 'sap from broken pine', 'clove heat in a silent room', 'rain caught in stone cracks', 'fermented fruit in a cellar'];
 
-    const evocative = ['the weight of forgotten history', 'the sound of thunder on the horizon', 'a heart that’s been broken too many times', 'the warmth of summer’s last breath', 'the crushing silence after the storm', 'a sense of longing that never fades', 'the memory of an unspoken promise', 'a fleeting moment of peace before war', 'the glow of a distant star burning out', 'the taste of freedom after captivity', 'a storm that is always on the edge', 'a secret that never leaves one’s mind', 'the coldness of the last snow', 'the rush before a first kiss', 'the fear that crawls under the skin', 'a song that haunts the quiet', 'a shadow that won’t let go', 'the scent of death too close', 'the bittersweetness of a lie', 'the warmth of someone else’s fire', 'the echo of footsteps in an empty hall', 'a love that was never yours to keep', 'the stillness before a name is spoken', 'regret woven into every breath', 'the hunger of a soul left waiting', 'a promise carved into stone and forgotten', 'the ache of almost', 'the hush of snowfall on a battlefield', 'a prayer said too late', 'the ache in a voice that won’t break', 'the chill of being truly seen', 'a goodbye written but never sent', 'the shiver of recognition in a stranger’s eyes', 'the emptiness after laughter fades', 'hope held too tightly', 'the final note of a song unsung', 'a silence filled with meaning', 'the pull of a place that never existed', 'the truth buried beneath kindness', 'a name whispered by the wind'];
+    const evocative = ['the weight of forgotten history', 'the sound of thunder on the horizon', 'a heart that’s been broken too many times', 'the warmth of summer’s last breath', 'the crushing silence after the storm', 'a sense of longing that never fades', 'the memory of an unspoken promise', 'a fleeting moment of peace before war', 'the glow of a distant star burning out', 'the taste of freedom after captivity', 'a storm that is always on the edge', 'a secret that never leaves one’s mind', 'the coldness of the last snow', 'the rush before a first kiss', 'the fear that crawls under the skin', 'a song that haunts the quiet', 'a shadow that won’t let go', 'the scent of death, close up', 'the bittersweetness of a lie', 'the warmth of someone else’s fire', 'the echo of footsteps in an empty hall', 'a love that was never yours to keep', 'the stillness before a name is spoken', 'regret woven into every breath', 'the hunger of a soul left waiting', 'a promise carved into stone and forgotten', 'the ache of almost', 'the hush of snowfall on a battlefield', 'a prayer said too late', 'the ache in a voice that won’t break', 'the chill of being truly seen', 'a goodbye written but never sent', 'the shiver of recognition in a stranger’s eyes', 'the emptiness after laughter fades', 'hope held too tightly', 'the final note of a song unsung', 'a silence filled with meaning', 'the pull of a place that never existed', 'the truth buried beneath kindness', 'a name whispered by the wind'];
 
     // <--- Begin ---> //
     function storageAvailable(type) {
@@ -4215,14 +4201,6 @@
       });
       currentDieSides = Number(obj.die) || 20;
       postProcessCharacter(obj);
-      if (obj.iconState) {
-        iconState = obj.iconState;
-        Object.entries(iconState).forEach(([iconName, count]) => {
-          if (count > 0) {
-            addToDock(iconName, 0, true); // Add with zero increment but set count directly
-          }
-        });
-      }
       return obj;
     }
 
@@ -4649,8 +4627,6 @@
         newData.id = generateTimestampID();
       }
       postProcessCharacter(newData);
-
-      character.iconState = iconState;
 
       character = { ...character, ...newData };
       currentDieSides = Number(character.die) || 20;
@@ -6406,9 +6382,9 @@
         wrapper.className = 'icon-wrapper';
 
         if (fromInput) {
-          wrapper.dataset.source = 'input';  // mark this wrapper as input-based
+          wrapper.dataset.source = 'input';
         } else {
-          wrapper.dataset.source = 'button'; // or mark button-based
+          wrapper.dataset.source = 'button';
         }
 
         const icon = document.createElement('div');
@@ -6472,7 +6448,6 @@
     function updateDockFromInputs() {
       iconState = {};
 
-      // Remove only counters that were added from inputs
       const inputCounters = dock.querySelectorAll('.icon-wrapper[data-source="input"]');
       inputCounters.forEach(el => el.remove());
 
