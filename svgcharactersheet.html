@@ -87,6 +87,18 @@
       transition: transform 0.2s ease;
     }
 
+    .counter {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: red;
+      /* unified color */
+      color: white;
+      border-radius: 50%;
+      padding: 2px 5px;
+      font-size: 12px;
+    }
+
     #reminder {
       opacity: 0.5;
       cursor: pointer;
@@ -1231,8 +1243,7 @@
               </tr>
               <tr>
                 <td colspan="4">
-                  <button type="button" onclick="openOverlay('iconPanel')"
-                    class="circle-add-reverse bs svgIcon"
+                  <button type="button" onclick="openOverlay('iconPanel')" class="circle-add-reverse bs svgIcon"
                     data-title="Click to Select Counter | (SHIFT) Click to add Random">&nbsp;
                   </button>
                 </td>
@@ -4754,15 +4765,18 @@
       });
     }
 
-    document.addEventListener('DOMContentLoaded', main);
-
     function formatKindLabel(kind) {
       const sizes = kind.size?.join('/') || '';
       return `${kind.name} [${kind.rarity}, ${sizes}]`;
     }
 
-    function main() {
+    document.addEventListener('DOMContentLoaded', main);
 
+    function main() {
+      addIconCSS();
+      populateIconBox();
+      setupInputListeners();
+      updateDockFromInputs();
       let suppressFormEvents = false;
 
       if (getTheme() === 'dark') applySvgTheme('dark');
@@ -6357,37 +6371,84 @@
     // <--- Begin Dock ---> //
 
     const dock = document.getElementById('dock');
-    dock.style.display = 'none';
     const iconSize = 48;
     const maxScale = 2;
-    const iconState = {};
+    let iconState = {};
 
-    document.getElementById('st1').addEventListener('change', updateDockFromInputs);
+    const inputIds = ['st1', 'st2', 'st3', 'st4', 'st5', 'st6', 'st7', 'st8'];
 
-    function loadIcon(name) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'icon-wrapper';
-      const img = document.createElement('img');
-      img.src = `./img/icon/${name}.svg`;
-      img.className = 'dock-icon';
-      img.alt = name;
+    const inputToIconMap = {
+      st1: 'condition-torment',
+      st2: 'condition-stress',
+      st3: 'condition-droplet',
+      st3: 'condition-exhaustion',
+      st5: 'status-skull',
+      st6: 'status-compass',
+      st7: 'status-milestone',
+    };
 
-      const counter = document.createElement('div');
-      counter.className = 'counter';
-      counter.textContent = iconState[name] || 0;
-      counter.style.display = iconState[name] > 0 ? 'block' : 'none';
+    function addToDock(iconName, count) {
+      // Add or update icon with exact count, no increments
+      let wrapper = dock.querySelector(`.icon-wrapper .dock-icon.${iconName}`)?.parentElement;
 
-      wrapper.appendChild(img);
-      wrapper.appendChild(counter);
+      if (!wrapper) {
+        wrapper = document.createElement('div');
+        wrapper.className = 'icon-wrapper';
 
-      wrapper.addEventListener('click', () => {
-        iconState[name] = (iconState[name] || 0) + 1;
-        counter.textContent = iconState[name];
-        counter.style.display = 'block';
+        const icon = document.createElement('div');
+        icon.className = `dock-icon bs svgIcon ${iconName}`;
+
+        const counter = document.createElement('div');
+        counter.className = 'counter';
+        icon.appendChild(counter);
+        wrapper.appendChild(icon);
+        dock.appendChild(wrapper);
+      }
+
+      // Update counter text
+      const counter = wrapper.querySelector('.counter');
+      counter.textContent = count;
+
+      // Show/hide based on count
+      wrapper.style.display = count > 0 ? 'block' : 'none';
+
+      // Save state
+      iconState[iconName] = count;
+    }
+    function updateDockFromInputs() {
+      dock.innerHTML = '';
+      iconState = {}; // reset state
+
+      inputIds.forEach(id => {
+        if (id === 'st8') return; // skip st8 for now (it’s output)
+        const input = document.getElementById(id);
+        if (!input) return;
+        const value = parseInt(input.value) || 0;
+        if (value > 0) {
+          const iconName = inputToIconMap[id] || id;
+          addToDock(iconName, value);
+        }
       });
 
-      dock.appendChild(wrapper);
+      dock.style.display = dock.children.length > 0 ? 'flex' : 'none';
+
+      // Update st8 input to reflect total counters
+      const total = Object.values(iconState).reduce((a, b) => a + b, 0);
+      const st8 = document.getElementById('st8');
+      if (st8) st8.value = total;
     }
+
+    function setupInputListeners() {
+      inputIds.forEach(id => {
+        const input = document.getElementById(id);
+        if (!input) return;
+        if (id !== 'st8') {
+          input.addEventListener('change', updateDockFromInputs);
+          input.addEventListener('input', updateDockFromInputs); // optional for live update
+        }
+      });
+    }
+
 
     document.addEventListener('mousemove', e => {
       const rect = dock.getBoundingClientRect();
@@ -6400,23 +6461,11 @@
       });
     });
 
-    function updateDockFromInputs() {
-      dock.innerHTML = '';
-      icons.forEach(id => {
-        const value = parseInt(document.getElementById(id)?.value || '0');
-        if (value > 0) {
-          iconState[id] = value;
-          loadIcon(id);
-        }
-      });
-      dock.style.display = dock.children.length > 0 ? 'flex' : 'none';
-    }
-
     function getTotalCounters() {
       return Object.values(iconState).reduce((sum, val) => sum + val, 0);
     }
 
-    const icons = ['coin', 'd2', 'd2-1', 'd2-0', 'd4', 'd6-1', 'd6-2', 'd6-3', 'd6-4', 'd6-5', 'd6-6', 'd8', 'd10', 'd10-2', 'd12', 'd20', 'd100', 'd200', 'rsb1', 'rsb2', 'rsb3', 'rsb4', 'rsb5', 'circle', 'circle-half', 'circle-down', 'circle-up', 'circle-left', 'circle-right', 'circle-add', 'circle-sub', 'circle-multiply', 'circle-division', 'circle-equals', 'circle-x', 'chess-circle', 'chess-pawn', 'chess-king', 'chess-queen', 'chess-knight', 'chess-bishop', 'chess-rook', 'chess-pieces', 'chess-board', 'calculator', 'weather-0', 'weather-1', 'weather-2', 'weather-3', 'weather-4', 'weather-5', 'weather-6', 'weather-7', 'weather-8', 'weather-9', 'weather-a', 'weather-b', 'weather-c', 'weather-d', 'weather-e', 'weather-f', 'weather-g', 'battery0', 'battery1', 'battery2', 'battery3', 'battery4', 'temp-indicator', 'bullseye', 'bullseye-arrow', 'clone', 'hand', 'heart-full', 'heart-half', 'heart-empty', 'heart-broken', 'floppy-disk', 'down-square', 'people-down', 'arrow-down', 'arrow-up', 'file-box', 'trash', 'deckcard', 'discard', 'eye', 'eye-red', 'bomb', 'clock-hour', 'full-rest', 'move0', 'move1', 'move2', 'move3', 'label-str', 'label-dex', 'label-con', 'label-int', 'label-cha', 'label-basic', 'label-standard', 'label-enhanced', 'label-advanced', 'label-ultimate', 'label-defense', 'yin-yang', 'npc', 'arcane-scroll', 'arcane-scroll-read', 'arcane-spell-book', 'arcane-sceptre', 'arcane-boon', 'arcane-cloak', 'arcane-enhanced', 'arcane-focus', 'arcane-shield', 'arcane-weapon', 'arcane-bonus', 'condition-boon', 'condition-bane', 'condition-incapacitate', 'condition-paralyze', 'condition-petrify', 'condition-grapple', 'condition-restrain', 'condition-charm', 'condition-surprised', 'condition-fright', 'condition-blind', 'condition-hide', 'condition-invisible', 'condition-fatigue', 'condition-stun', 'condition-fury', 'condition-sleep', 'condition-focus', 'condition-dead', 'condition-droplet', 'condition-exhaustion', 'condition-stress', 'condition-prone', 'condition-flying', 'condition-falling', 'actions', 'star', 'star-reverse', 'heart-red', 'status-compass', 'status-marker', 'status-milestone', 'status-fire', 'status-crown', 'status-authority', 'status-bolt', 'status-cat', 'status-skull', 'status-pie-full', 'status-pie-half', 'status-pie-quarter', 'status-cover1', 'status-cover2', 'status-cover3', 'status-shield', 'status-timer', 'status-egg', 'status-dragon', 'status-dungeon', 'status-target', 'gear-ammo0', 'gear-ammo1', 'gear-ammo2', 'gear-swords', 'gear-axe', 'gear-battle-axe', 'gear-ring', 'gear-torch', 'gear-ration', 'gear-sack', 'gear-pack', 'gear-potion', 'gear-poison', 'skill-acrobatic', 'skill-might', 'skill-crystal-ball', 'skill-divine', 'skill-deception', 'skill-defense', 'skill-battery', 'skill-intimidation', 'skill-insight', 'skill-magnify', 'skill-book', 'skill-heal', 'skill-leaf', 'skill-perceptive', 'skill-performant', 'skill-persuasion', 'skill-purity', 'skill-legerdemain', 'skill-conceal', 'skill-survivalist', 'skill-tamer', 'skill-wealth', 'skill-helping', 'skill-command', 'skill-encumbrance', 'skill-fortitude', 'skill-halfprof', 'skill-ammo', 'skill-armor', 'skill-trap', 'skill-abacus', 'skill-potionkit', 'skill-artsupplies', 'skill-anvil', 'skill-fork', 'skill-inkwell', 'skill-disguisekit', 'skill-firearm', 'skill-medicalbag', 'skill-miner', 'skill-picks', 'skill-tool', 'skill-tools', 'skill-vehicle', 'skill-goggles', 'skill-wheel', 'skill-sextant', 'skill-fort', 'skill-mansion', 'skill-blimp', 'skill-cart', 'skill-ship', 'skill-broom', 'skill-parachute', 'skill-decoy', 'skill-house', 'skill-property', 'skill-museum', 'skill-mill', 'skill-shop', 'skill-stall', 'skill-tent', 'skill-place', 'skill-sign', 'skill-default', 'status-pentacle', 'status-hero-coin', 'status-inspiration', 'dice0-red', 'dice1-orange', 'dice2-yellow', 'dice3-green', 'dice4-blue', 'dice5-paleblue', 'dice6-purple', 'dice7-pink', 'dice8-light', 'dice9-dark', 'circle-add-reverse'];
+    const icons = ['coin', 'd2', 'd2-1', 'd2-0', 'd4', 'd6-1', 'd6-2', 'd6-3', 'd6-4', 'd6-5', 'd6-6', 'd8', 'd10', 'd10-2', 'd12', 'd20', 'd100', 'd200', 'rsb1', 'rsb2', 'rsb3', 'rsb4', 'rsb5', 'circle', 'circle-half', 'circle-down', 'circle-up', 'circle-left', 'circle-right', 'circle-add', 'circle-sub', 'circle-multiply', 'circle-division', 'circle-equals', 'circle-x', 'chess-circle', 'chess-pawn', 'chess-king', 'chess-queen', 'chess-knight', 'chess-bishop', 'chess-rook', 'chess-pieces', 'chess-board', 'calculator', 'weather-0', 'weather-1', 'weather-2', 'weather-3', 'weather-4', 'weather-5', 'weather-6', 'weather-7', 'weather-8', 'weather-9', 'weather-a', 'weather-b', 'weather-c', 'weather-d', 'weather-e', 'weather-f', 'weather-g', 'battery0', 'battery1', 'battery2', 'battery3', 'battery4', 'temp-indicator', 'bullseye', 'bullseye-arrow', 'clone', 'hand', 'heart-full', 'heart-half', 'heart-empty', 'heart-broken', 'floppy-disk', 'down-square', 'people-down', 'arrow-down', 'arrow-up', 'file-box', 'trash', 'deckcard', 'discard', 'eye', 'eye-red', 'bomb', 'clock-hour', 'full-rest', 'move0', 'move1', 'move2', 'move3', 'label-str', 'label-dex', 'label-con', 'label-int', 'label-cha', 'label-basic', 'label-standard', 'label-enhanced', 'label-advanced', 'label-ultimate', 'label-defense', 'yin-yang', 'npc', 'arcane-scroll', 'arcane-scroll-read', 'arcane-spell-book', 'arcane-sceptre', 'arcane-boon', 'arcane-cloak', 'arcane-enhanced', 'arcane-focus', 'arcane-shield', 'arcane-weapon', 'arcane-bonus', 'condition-boon', 'condition-bane', 'condition-incapacitate', 'condition-paralyze', 'condition-petrify', 'condition-grapple', 'condition-restrain', 'condition-charm', 'condition-surprised', 'condition-fright', 'condition-blind', 'condition-hide', 'condition-invisible', 'condition-fatigue', 'condition-stun', 'condition-fury', 'condition-sleep', 'condition-focus', 'condition-dead', 'condition-prone', 'condition-flying', 'condition-falling', 'actions', 'star', 'star-reverse', 'heart-red', 'status-marker', 'status-fire', 'status-crown', 'status-authority', 'status-bolt', 'status-cat', 'status-pie-full', 'status-pie-half', 'status-pie-quarter', 'status-cover1', 'status-cover2', 'status-cover3', 'status-shield', 'status-timer', 'status-egg', 'status-dragon', 'status-dungeon', 'status-target', 'gear-ammo0', 'gear-ammo1', 'gear-ammo2', 'gear-swords', 'gear-axe', 'gear-battle-axe', 'gear-ring', 'gear-torch', 'gear-ration', 'gear-sack', 'gear-pack', 'gear-potion', 'gear-poison', 'skill-acrobatic', 'skill-might', 'skill-crystal-ball', 'skill-divine', 'skill-deception', 'skill-defense', 'skill-battery', 'skill-intimidation', 'skill-insight', 'skill-magnify', 'skill-book', 'skill-heal', 'skill-leaf', 'skill-perceptive', 'skill-performant', 'skill-persuasion', 'skill-purity', 'skill-legerdemain', 'skill-conceal', 'skill-survivalist', 'skill-tamer', 'skill-wealth', 'skill-helping', 'skill-command', 'skill-encumbrance', 'skill-fortitude', 'skill-halfprof', 'skill-ammo', 'skill-armor', 'skill-trap', 'skill-abacus', 'skill-potionkit', 'skill-artsupplies', 'skill-anvil', 'skill-fork', 'skill-inkwell', 'skill-disguisekit', 'skill-firearm', 'skill-medicalbag', 'skill-miner', 'skill-picks', 'skill-tool', 'skill-tools', 'skill-vehicle', 'skill-goggles', 'skill-wheel', 'skill-sextant', 'skill-fort', 'skill-mansion', 'skill-blimp', 'skill-cart', 'skill-ship', 'skill-broom', 'skill-parachute', 'skill-decoy', 'skill-house', 'skill-property', 'skill-museum', 'skill-mill', 'skill-shop', 'skill-stall', 'skill-tent', 'skill-place', 'skill-sign', 'skill-default', 'status-pentacle', 'status-hero-coin', 'status-inspiration', 'dice0-red', 'dice1-orange', 'dice2-yellow', 'dice3-green', 'dice4-blue', 'dice5-paleblue', 'dice6-purple', 'dice7-pink', 'dice8-light', 'dice9-dark', 'circle-add-reverse'];
 
     function addIconCSS() {
       const styleEl = document.createElement('style');
@@ -6457,14 +6506,18 @@
         btn.type = 'button';
         btn.className = `${iconName} bs svgIcon`;
         btn.title = iconName;
-        btn.innerHTML = '&nbsp;'; // placeholder content
+        btn.innerHTML = '&nbsp;';
+
+        // Attach click here
+        btn.addEventListener('click', () => {
+          const name = iconName;
+          addToDock(name);
+        });
 
         container.appendChild(btn);
       });
     }
 
-    window.addEventListener('load', populateIconBox);
-    window.addEventListener('load', addIconCSS);
 
     // <--- Begin Sounds ---> //
 
