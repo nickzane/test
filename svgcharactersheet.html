@@ -4215,6 +4215,14 @@
       });
       currentDieSides = Number(obj.die) || 20;
       postProcessCharacter(obj);
+      if (obj.iconState) {
+        iconState = obj.iconState;
+        Object.entries(iconState).forEach(([iconName, count]) => {
+          if (count > 0) {
+            addToDock(iconName, 0, true); // Add with zero increment but set count directly
+          }
+        });
+      }
       return obj;
     }
 
@@ -4641,6 +4649,9 @@
         newData.id = generateTimestampID();
       }
       postProcessCharacter(newData);
+
+      character.iconState = iconState;
+
       character = { ...character, ...newData };
       currentDieSides = Number(character.die) || 20;
       updateSVG(character);
@@ -4649,6 +4660,7 @@
       handleGoldChange();
       document.title = `Spice TTRPG - ${character.name} - ${character.id}`;
     }
+
 
     function applySelectOrCustom(input, customInput, value) {
       const knownOptions = Array.from(input.options).map(opt => opt.value);
@@ -6386,7 +6398,7 @@
       st7: 'status-milestone',
     };
 
-    function addToDock(iconName, count = 1, fromInput = false) {
+    function addToDock(iconName, count = 1, fromInput = false, forceSet = false) {
       let wrapper = dock.querySelector(`.icon-wrapper .dock-icon.${iconName}`)?.parentElement;
 
       if (!wrapper) {
@@ -6432,7 +6444,12 @@
         });
       }
 
-      iconState[iconName] = (iconState[iconName] || 0) + count;
+      if (forceSet) {
+        iconState[iconName] = count;
+      } else {
+        iconState[iconName] = (iconState[iconName] || 0) + count;
+      }
+
       const updatedCount = iconState[iconName];
       const counter = wrapper.querySelector('.counter');
       counter.textContent = updatedCount;
@@ -6505,7 +6522,7 @@
       return Object.values(iconState).reduce((sum, val) => sum + val, 0);
     }
 
-    const icons = ['coin', 'd2', 'd2-1', 'd2-0', 'd4', 'd6-1', 'd6-2', 'd6-3', 'd6-4', 'd6-5', 'd6-6', 'd8', 'd10', 'd10-2', 'd12', 'd20', 'd100', 'd200', 'rsb1', 'rsb2', 'rsb3', 'rsb4', 'rsb5', 'circle', 'circle-half', 'circle-down', 'circle-up', 'circle-left', 'circle-right', 'circle-add', 'circle-sub', 'circle-multiply', 'circle-division', 'circle-equals', 'circle-x', 'chess-circle', 'chess-pawn', 'chess-king', 'chess-queen', 'chess-knight', 'chess-bishop', 'chess-rook', 'chess-pieces', 'chess-board', 'calculator', 'weather-0', 'weather-1', 'weather-2', 'weather-3', 'weather-4', 'weather-5', 'weather-6', 'weather-7', 'weather-8', 'weather-9', 'weather-a', 'weather-b', 'weather-c', 'weather-d', 'weather-e', 'weather-f', 'weather-g', 'battery0', 'battery1', 'battery2', 'battery3', 'battery4', 'temp-indicator', 'bullseye', 'bullseye-arrow', 'clone', 'hand', 'heart-full', 'heart-half', 'heart-empty', 'heart-broken', 'floppy-disk', 'down-square', 'people-down', 'arrow-down', 'arrow-up', 'file-box', 'trash', 'deckcard', 'discard', 'eye', 'eye-red', 'bomb', 'clock-hour', 'full-rest', 'move0', 'move1', 'move2', 'move3', 'label-str', 'label-dex', 'label-con', 'label-int', 'label-cha', 'label-basic', 'label-standard', 'label-enhanced', 'label-advanced', 'label-ultimate', 'label-defense', 'yin-yang', 'npc', 'arcane-scroll', 'arcane-scroll-read', 'arcane-spell-book', 'arcane-sceptre', 'arcane-boon', 'arcane-cloak', 'arcane-enhanced', 'arcane-focus', 'arcane-shield', 'arcane-weapon', 'arcane-bonus', 'condition-stress', 'condition-droplet', 'condition-exhaustion', 'condition-boon', 'condition-bane', 'condition-incapacitate', 'condition-paralyze', 'condition-petrify', 'condition-grapple', 'condition-restrain', 'condition-charm', 'condition-surprised', 'condition-fright', 'condition-blind', 'condition-hide', 'condition-invisible', 'condition-fatigue', 'condition-stun', 'condition-fury', 'condition-sleep', 'condition-focus', 'condition-dead', 'condition-prone', 'condition-flying', 'condition-falling', 'actions', 'star', 'star-reverse', 'heart-red', 'status-skull', 'status-compass', 'status-milestone', 'status-marker', 'status-fire', 'status-crown', 'status-authority', 'status-bolt', 'status-cat', 'status-pie-full', 'status-pie-half', 'status-pie-quarter', 'status-cover1', 'status-cover2', 'status-cover3', 'status-shield', 'status-timer', 'status-egg', 'status-dragon', 'status-dungeon', 'status-target', 'gear-ammo0', 'gear-ammo1', 'gear-ammo2', 'gear-swords', 'gear-axe', 'gear-battle-axe', 'gear-ring', 'gear-torch', 'gear-ration', 'gear-sack', 'gear-pack', 'gear-potion', 'gear-poison', 'skill-acrobatic', 'skill-might', 'skill-crystal-ball', 'skill-divine', 'skill-deception', 'skill-defense', 'skill-battery', 'skill-intimidation', 'skill-insight', 'skill-magnify', 'skill-book', 'skill-heal', 'skill-leaf', 'skill-perceptive', 'skill-performant', 'skill-persuasion', 'skill-purity', 'skill-legerdemain', 'skill-conceal', 'skill-survivalist', 'skill-tamer', 'skill-wealth', 'skill-helping', 'skill-command', 'skill-encumbrance', 'skill-fortitude', 'skill-halfprof', 'skill-ammo', 'skill-armor', 'skill-trap', 'skill-abacus', 'skill-potionkit', 'skill-artsupplies', 'skill-anvil', 'skill-fork', 'skill-inkwell', 'skill-disguisekit', 'skill-firearm', 'skill-medicalbag', 'skill-miner', 'skill-picks', 'skill-tool', 'skill-tools', 'skill-vehicle', 'skill-goggles', 'skill-wheel', 'skill-sextant', 'skill-fort', 'skill-mansion', 'skill-blimp', 'skill-cart', 'skill-ship', 'skill-broom', 'skill-parachute', 'skill-decoy', 'skill-house', 'skill-property', 'skill-museum', 'skill-mill', 'skill-shop', 'skill-stall', 'skill-tent', 'skill-place', 'skill-sign', 'skill-default', 'status-pentacle', 'status-hero-coin', 'status-inspiration', 'dice0-red', 'dice1-orange', 'dice2-yellow', 'dice3-green', 'dice4-blue', 'dice5-paleblue', 'dice6-purple', 'dice7-pink', 'dice8-light', 'dice9-dark', 'circle-add-reverse'];
+    const icons = ['coin', 'd2', 'd2-1', 'd2-0', 'd4', 'd6-1', 'd6-2', 'd6-3', 'd6-4', 'd6-5', 'd6-6', 'd8', 'd10', 'd10-2', 'd12', 'd20', 'd100', 'd200', 'rsb1', 'rsb2', 'rsb3', 'rsb4', 'rsb5', 'circle', 'circle-half', 'circle-down', 'circle-up', 'circle-left', 'circle-right', 'circle-add', 'circle-sub', 'circle-multiply', 'circle-division', 'circle-equals', 'circle-x', 'chess-circle', 'chess-pawn', 'chess-king', 'chess-queen', 'chess-knight', 'chess-bishop', 'chess-rook', 'chess-pieces', 'chess-board', 'calculator', 'weather-0', 'weather-1', 'weather-2', 'weather-3', 'weather-4', 'weather-5', 'weather-6', 'weather-7', 'weather-8', 'weather-9', 'weather-a', 'weather-b', 'weather-c', 'weather-d', 'weather-e', 'weather-f', 'weather-g', 'battery0', 'battery1', 'battery2', 'battery3', 'battery4', 'temp-indicator', 'bullseye', 'bullseye-arrow', 'clone', 'hand', 'heart-full', 'heart-half', 'heart-empty', 'heart-broken', 'floppy-disk', 'down-square', 'people-down', 'arrow-down', 'arrow-up', 'file-box', 'trash', 'deckcard', 'discard', 'eye', 'eye-red', 'bomb', 'clock-hour', 'full-rest', 'move0', 'move1', 'move2', 'move3', 'label-str', 'label-dex', 'label-con', 'label-int', 'label-cha', 'label-basic', 'label-standard', 'label-enhanced', 'label-advanced', 'label-ultimate', 'label-defense', 'yin-yang', 'npc', 'arcane-scroll', 'arcane-scroll-read', 'arcane-spell-book', 'arcane-sceptre', 'arcane-boon', 'arcane-cloak', 'arcane-enhanced', 'arcane-focus', 'arcane-shield', 'arcane-weapon', 'arcane-bonus', 'condition-torment', 'condition-stress', 'condition-droplet', 'condition-exhaustion', 'condition-boon', 'condition-bane', 'condition-incapacitate', 'condition-paralyze', 'condition-petrify', 'condition-grapple', 'condition-restrain', 'condition-charm', 'condition-surprised', 'condition-fright', 'condition-blind', 'condition-hide', 'condition-invisible', 'condition-fatigue', 'condition-stun', 'condition-fury', 'condition-sleep', 'condition-focus', 'condition-dead', 'condition-prone', 'condition-flying', 'condition-falling', 'actions', 'star', 'star-reverse', 'heart-red', 'status-skull', 'status-compass', 'status-milestone', 'status-marker', 'status-fire', 'status-crown', 'status-authority', 'status-bolt', 'status-cat', 'status-pie-full', 'status-pie-half', 'status-pie-quarter', 'status-cover1', 'status-cover2', 'status-cover3', 'status-shield', 'status-timer', 'status-egg', 'status-dragon', 'status-dungeon', 'status-target', 'gear-ammo0', 'gear-ammo1', 'gear-ammo2', 'gear-swords', 'gear-axe', 'gear-battle-axe', 'gear-ring', 'gear-torch', 'gear-ration', 'gear-sack', 'gear-pack', 'gear-potion', 'gear-poison', 'skill-acrobatic', 'skill-might', 'skill-crystal-ball', 'skill-divine', 'skill-deception', 'skill-defense', 'skill-battery', 'skill-intimidation', 'skill-insight', 'skill-magnify', 'skill-book', 'skill-heal', 'skill-leaf', 'skill-perceptive', 'skill-performant', 'skill-persuasion', 'skill-purity', 'skill-legerdemain', 'skill-conceal', 'skill-survivalist', 'skill-tamer', 'skill-wealth', 'skill-helping', 'skill-command', 'skill-encumbrance', 'skill-fortitude', 'skill-halfprof', 'skill-ammo', 'skill-armor', 'skill-trap', 'skill-abacus', 'skill-potionkit', 'skill-artsupplies', 'skill-anvil', 'skill-fork', 'skill-inkwell', 'skill-disguisekit', 'skill-firearm', 'skill-medicalbag', 'skill-miner', 'skill-picks', 'skill-tool', 'skill-tools', 'skill-vehicle', 'skill-goggles', 'skill-wheel', 'skill-sextant', 'skill-fort', 'skill-mansion', 'skill-blimp', 'skill-cart', 'skill-ship', 'skill-broom', 'skill-parachute', 'skill-decoy', 'skill-house', 'skill-property', 'skill-museum', 'skill-mill', 'skill-shop', 'skill-stall', 'skill-tent', 'skill-place', 'skill-sign', 'skill-default', 'status-pentacle', 'status-hero-coin', 'status-inspiration', 'dice0-red', 'dice1-orange', 'dice2-yellow', 'dice3-green', 'dice4-blue', 'dice5-paleblue', 'dice6-purple', 'dice7-pink', 'dice8-light', 'dice9-dark', 'circle-add-reverse'];
 
     function addIconCSS() {
       const styleEl = document.createElement('style');
